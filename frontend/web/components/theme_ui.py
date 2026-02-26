@@ -32,7 +32,14 @@ class ThemeUIComponent:
         css_file = self.css_dir / f"{theme}_theme.css"
         
         try:
-            with open(css_file, "r", encoding="utf-8") as f:
+            base_dir = Path(self.css_dir).resolve()
+            resolved_path = css_file.resolve()
+            try:
+                resolved_path.relative_to(base_dir)
+            except ValueError:
+                raise Exception("Invalid file path")
+            
+            with open(resolved_path, "r", encoding="utf-8") as f:
                 return f.read()
         except Exception as e:
             print(f"테마 CSS 파일 로드 오류: {str(e)}")
