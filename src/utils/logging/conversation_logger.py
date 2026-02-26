@@ -218,9 +218,15 @@ class ConversationLogger:
     def load_session(self, session_id: str) -> Optional[ConversationSession]:
         """세션 로드"""
         try:
+            base_dir = self.base_path.resolve()
             for session_file in self.base_path.rglob(f"session_{session_id}.json"):
                 if session_file.exists():
-                    with open(session_file, 'r', encoding='utf-8') as f:
+                    session_file_resolved = session_file.resolve()
+                    try:
+                        session_file_resolved.relative_to(base_dir)
+                    except ValueError:
+                        raise Exception('Invalid file path')
+                    with open(session_file_resolved, 'r', encoding='utf-8') as f:
                         session_data = json.load(f)
                     return ConversationSession.from_dict(session_data)
             return None
