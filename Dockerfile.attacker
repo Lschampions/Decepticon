@@ -1,4 +1,4 @@
-FROM kalilinux/kali-rolling
+FROM kalilinux/kali-rolling@sha256:6b683fba6b44c842cda69cbfdad1be26d8d3bd1ab217293fc47945c63cc103aa
 
 # korea 
 
