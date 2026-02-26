@@ -263,9 +263,14 @@ class ChatHistoryManager:
         """
         try:
             # logs 폴더에서 세션 파일 검색
-            logs_path = Path("logs")
-            for session_file in logs_path.rglob(f"session_{session_id}.json"):
-                with open(session_file, 'r', encoding='utf-8') as f:
+            logs_path = Path("logs").resolve()
+            for session_file in Path("logs").rglob(f"session_{session_id}.json"):
+                session_file_resolved = session_file.resolve()
+                try:
+                    session_file_resolved.relative_to(logs_path)
+                except ValueError:
+                    raise Exception('Invalid file path')
+                with open(session_file_resolved, 'r', encoding='utf-8') as f:
                     return json.load(f)
         except Exception as e:
             print(f"Error loading session file: {e}")
