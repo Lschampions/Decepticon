@@ -31,6 +31,7 @@ dependencies = [
     "langmem>=0.0.25",
     "langsmith>=0.3.42",
     "mcp>=1.8.1",
+    "nltk==3.9.3",
     "pytest-asyncio>=1.0.0",
     "python-dotenv>=1.1.0",
     "python-engineio==4.7.1",
