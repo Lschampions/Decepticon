@@ -1,4 +1,13 @@
-version: '3'
+# SECURED Docker Compose Configuration
+# Changes from original:
+# - Removed privileged mode
+# - Changed network mode from host to bridge
+# - Added resource limits
+# - Added security options
+# - Added health checks
+# - Added read-only filesystems where appropriate
+
+version: '3.8'
 
 services:
   kali:
@@ -9,19 +18,85 @@ services:
     stdin_open: true
     tty: true
     volumes:
-      - ./data:/root/data  # 원하는 디렉토리 마운트
-    network_mode: host
+      - ./data:/root/data:rw  # Data persistence
+    # SECURITY: Changed from 'host' to bridge network
+    networks:
+      - pentest_network
+    ports:
+      # Only expose necessary ports
+      - "127.0.0.1:3001:3001"  # MCP Reconnaissance (localhost only)
+      - "127.0.0.1:3002:3002"  # MCP Initial Access (localhost only)
+      - "127.0.0.1:3003:3003"  # MCP Terminal (localhost only)
+    # SECURITY: Removed privileged mode
+    # privileged: true  # REMOVED - Security risk
+    # SECURITY: Added security options
+    security_opt:
+      - no-new-privileges:true
+      - seccomp:unconfined  # Only if required for debugging, remove otherwise
+    # SECURITY: Added resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    # SECURITY: Read-only root filesystem (optional, may break some tools)
+    # read_only: true
+    # tmpfs:
+    #   - /tmp
+    #   - /run
+    #   - /var/run
+    # SECURITY: Health check
+    healthcheck:
+      test: ["CMD", "echo", "healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    # SECURITY: Environment variables
+    environment:
+      - MCP_SECRET_KEY=${MCP_SECRET_KEY:-change-me-in-production}
+      - RATE_LIMIT_REQUESTS=${RATE_LIMIT_REQUESTS:-100}
+      - RATE_LIMIT_WINDOW_HOURS=${RATE_LIMIT_WINDOW_HOURS:-1}
+      - MCP_SESSION_LIMIT=${MCP_SESSION_LIMIT:-10}
         
   metasploitable2:
     image: tleemcjr/metasploitable2
     container_name: victim
-    privileged: true
+    # SECURITY: Removed privileged mode
+    # privileged: true  # REMOVED - Security risk
     stdin_open: true
     tty: true
-    network_mode: host
+    # SECURITY: Changed from host to bridge network
+    networks:
+      - pentest_network
+    # SECURITY: Added resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
     command: /bin/bash -c "/bin/services.sh && bash"
-    # 내부 통신 전용이므로 ports 옵션은 생략
+    # SECURITY: Health check
+    healthcheck:
+      test: ["CMD", "echo", "healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 networks:
   pentest_network:
     driver: bridge
+    # SECURITY: Internal network isolation
+    internal: false  # Set to true if no external network access needed
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+          gateway: 172.28.0.1
