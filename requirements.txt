@@ -116,7 +116,7 @@ protoc-gen-openapiv2==0.0.1
 pure-eval==0.2.3
 py==1.11.0
 pyarrow==20.0.0
-pyasn1==0.6.2
+pyasn1==0.6.3
 pyasn1-modules==0.4.2
 pycparser==2.22
 pydantic==2.11.4
