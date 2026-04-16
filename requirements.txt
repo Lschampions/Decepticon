@@ -82,7 +82,7 @@ langgraph-sdk==0.1.66
 langgraph-supervisor==0.0.21
 langgraph-swarm==0.0.11
 langmem==0.0.25
-langsmith==0.3.42
+langsmith==0.7.31
 lz4==4.4.4
 markdown-it-py==3.0.0
 markupsafe==3.0.2
